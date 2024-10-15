@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waveform Upload and Combine</title>
+  <script src="https://unpkg.com/wavesurfer.js"></script>
+  <style>
+    #waveformContainer {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .waveformItem {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      cursor: move;
+    }
+
+    .waveformItem.dragging {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload Up to 6 .wav Files and Combine Them</h1>
+
+  <!-- File upload form -->
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="wavfiles" accept=".wav" id="wavInput" multiple required>
+    <button type="submit">Upload and Display Waveforms</button>
+  </form>
+
+  <!-- Divs to display the waveforms -->
+  <div id="waveformContainer"></div>
+  <button id="combineButton" style="display:none;">Combine Files</button>
+  <br><br>
+  <audio id="combinedAudio" controls style="display:none;"></audio>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const waveformContainer = document.getElementById('waveformContainer');
+    const combineButton = document.getElementById('combineButton');
+    const combinedAudio = document.getElementById('combinedAudio');
+
+    let uploadedFilePaths = [];
+    let waveformItems = [];
+
+    // Handle file upload
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const formData = new FormData();
+      const wavFiles = document.getElementById('wavInput').files;
+
+      if (wavFiles.length > 6) {
+        alert('You can upload up to 6 files.');
+        return;
+      }
+
+      for (let i = 0; i < wavFiles.length; i++) {
+        formData.append('wavfiles', wavFiles[i]);
+      }
+
+      // Upload the files
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          uploadedFilePaths = data.filePaths;
+
+          // Display waveforms with drag-and-drop functionality
+          displayWaveforms(data.filePaths);
+
+          // Show the combine button
+          combineButton.style.display = 'block';
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(error => console.error('Error uploading files:', error));
+    });
+
+    // Function to display the waveforms of uploaded files with drag-and-drop functionality
+    function displayWaveforms(filePaths) {
+      waveformContainer.innerHTML = '';  // Clear previous waveforms
+      waveformItems = [];  // Reset the array storing the waveform elements
+
+      filePaths.forEach((filePath, index) => {
+        const waveformDiv = document.createElement('div');
+        waveformDiv.classList.add('waveformItem');
+        waveformDiv.setAttribute('draggable', true);
+        waveformDiv.setAttribute('data-index', index);  // Store the original index of the file
+
+        const wavesurfer = WaveSurfer.create({
+          container: waveformDiv,
+          waveColor: 'violet',
+          progressColor: 'purple',
+          cursorColor: 'navy',
+          height: 100
+        });
+
+        wavesurfer.load(filePath);
+
+        // Add drag event listeners to the waveform
+        addDragAndDropEvents(waveformDiv);
+        waveformContainer.appendChild(waveformDiv);
+
+        // Store the waveform item for easy reference later
+        waveformItems.push({ filePath, element: waveformDiv });
+      });
+    }
+
+    // Function to add drag-and-drop event listeners
+    function addDragAndDropEvents(waveformDiv) {
+      waveformDiv.addEventListener('dragstart', (e) => {
+        e.target.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', e.target.dataset.index);
+      });
+
+      waveformDiv.addEventListener('dragend', (e) => {
+        e.target.classList.remove('dragging');
+      });
+
+      waveformContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();  // Allow dropping
+        const draggingElement = document.querySelector('.dragging');
+        const afterElement = getDragAfterElement(waveformContainer, e.clientY);
+
+        if (afterElement == null) {
+          waveformContainer.appendChild(draggingElement);
+        } else {
+          waveformContainer.insertBefore(draggingElement, afterElement);
+        }
+      });
+    }
+
+    // Helper function to get the waveform item that is directly after the current drag position
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.waveformItem:not(.dragging)')];
+
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // Handle combining the files
+    combineButton.addEventListener('click', function() {
+      const reorderedFilePaths = [];
+
+      // Get the reordered file paths based on the current order of the elements in the DOM
+      const waveformElements = document.querySelectorAll('.waveformItem');
+      waveformElements.forEach(el => {
+        const originalIndex = el.getAttribute('data-index');
+        reorderedFilePaths.push(uploadedFilePaths[originalIndex]);
+      });
+
+      // Send the reordered file paths to the server for combining
+      fetch('/combine', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ filePaths: reorderedFilePaths })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Display the combined audio file
+          combinedAudio.src = data.combinedFilePath;
+          combinedAudio.style.display = 'block';
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(error => console.error('Error combining files:', error));
+    });
+  </script>
+</body>
+</html>
