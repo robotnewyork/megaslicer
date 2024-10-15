@@ -71,7 +71,8 @@ app.post('/upload', (req, res) => {
     } else {
       if (req.files === undefined || req.files.length === 0) {
         res.send({ success: false, message: 'No files selected!' });
-      } else {
+      } 
+			else {
         // Send back the paths of the uploaded .wav files
         const filePaths = req.files.map(file => `/uploads/${file.filename}`);
         res.send({

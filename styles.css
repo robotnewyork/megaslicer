@@ -1,4 +1,4 @@
-
+/* Some Sega styling resourced from https://codepen.io/manz/pen/mdqeXoB */
 @font-face {
   font-family: "NiseMegadriveEU";
   src:
@@ -29,6 +29,12 @@ html, body {
 
 body {
   background: #000;
+	background-image:
+    radial-gradient(ellipse, #0000 20%, #0004 40%, #000 65%),
+    repeating-linear-gradient(to bottom, transparent 0 75px, #555 75px 76px),
+    repeating-linear-gradient(to right, transparent 0 75px, #555 75px 76px),
+    radial-gradient(ellipse 500px 600px at 50% 60%, #143071, transparent),
+    radial-gradient(circle 300px at 40% 40%, #8e1765, transparent);
 	color: white;
 	font-family: NiseSegaNet;
 }
@@ -46,6 +52,11 @@ h1 {
   padding-top: 3em;
 	flex-direction: column;
 }
+.container > div {
+	max-width: 600px;
+	width: 100%;
+	text-align: center;
+}
 
 /* FONTS */
 .sega {
@@ -61,18 +72,87 @@ h1 {
   color: white;
 }
 
+.center {
+	text-align: center;
+}
+.btn {
+	background-color: rgba(0, 0, 0, 0.5);
+	border:1px solid white;
+	padding: 6px 12px;
+	margin: 20px;
+	font-family: NiseSegaNet;
+	color: white;
+	font-size: 16px;
+	cursor: pointer;
+}
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  display: inline-block;
+}
+
+
+
 #waveformContainer {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
+}
+#waveformContainer .item {
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	width: 100%;
 }
 
 .waveformItem {
-	display: flex;
+	width: 80%;
 	align-items: center;
 	margin-bottom: 20px;
+	margin-top: 20px;
 	cursor: move;
 }
 
+
+.control-button {
+  border: 0;
+  background: transparent;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  border-color: transparent transparent transparent #fff;
+  cursor: pointer;
+  border-style: solid;
+  border-width: 15px 0 15px 30px;
+	cursor: pointer;
+	margin: 20px;
+}
+.control-button.paused {
+  border-style: double;
+  border-width: 0px 0 0px 60px;
+}
+.waveformPlay:hover {
+  border-color: transparent transparent transparent #404040;
+}
+
+
+
+.waveformStop {
+  border-style: solid;
+  border-width: 15px;
+  border-color: #fff;
+	cursor: pointer;
+}
+.waveformStop:hover {
+	border-color: #404040;
+}
+
+
 .waveformItem.dragging {
 	opacity: 0.5;
+}
+#combineButton {
+	margin: 20px auto;
 }
