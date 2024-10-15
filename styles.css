@@ -88,12 +88,22 @@ h1 {
 input[type="file"] {
   display: none;
 }
+#upload {
+	display: none;
+}
 
 .custom-file-upload {
   display: inline-block;
 }
 
-
+#filenames {
+	display: none;
+	border: 1px solid white;
+	padding: 10px;
+	font-size: 14px;
+	line-height: 25px;
+	font-family: monospace, sans-serif;
+}
 
 #waveformContainer {
 	display: flex;
@@ -150,7 +160,7 @@ input[type="file"] {
 }
 
 
-.waveformItem.dragging {
+.dragging {
 	opacity: 0.5;
 }
 #combineButton {

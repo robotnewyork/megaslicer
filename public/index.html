@@ -26,9 +26,13 @@
 				</label>
 				<input type="file" name="wavfiles" accept=".wav" id="wavInput" multiple required>
 			</div>
+			
+			<div id="filenames">
+				<!-- Area for displaying file names -->
+			</div>
 
 			<div>
-				<button type="submit" class="btn">UPLOAD</button>
+				<button type="submit" class="btn" id="upload">UPLOAD</button>
 			</div>
 
 			<div>
@@ -42,15 +46,30 @@
 
 		</div>
 	</form>
+	
 	<script>
 		const form = document.getElementById('uploadForm');
+		const upload = document.getElementById('upload');
+		const filenamesDiv = document.getElementById('filenames');
 		const waveformContainer = document.getElementById('waveformContainer');
 		const combineButton = document.getElementById('combineButton');
 		const combinedAudio = document.getElementById('combinedAudio');
+		const wavInput = document.getElementById('wavInput');
 
 		let uploadedFilePaths = [];
 		let waveformItems = [];
 
+		// Display file names when selected
+		wavInput.addEventListener('change', () => {
+			let filenames = '';
+			for (var i=0; i<wavInput.files.length; i++){
+				filenames = filenames + wavInput.files[i].name + '<br>';
+			}
+			filenamesDiv.innerHTML = filenames;
+			filenamesDiv.style.display = 'block';
+			upload.style.display = 'inline-block';
+		});
+		
 		// Handle file upload
 		form.addEventListener('submit', function (event) {
 			event.preventDefault();
@@ -97,11 +116,12 @@
 			filePaths.forEach((filePath, index) => {
 				const waveformDiv = document.createElement('div');
 				waveformDiv.classList.add('waveformItem');
-				waveformDiv.setAttribute('draggable', true);
+				
 				waveformDiv.setAttribute('data-index', index);  // Store the original index of the file
 				
 				const item = document.createElement('div');
 				item.classList.add('item');
+				item.setAttribute('draggable', true);
 				const waveformPlay = document.createElement('div');
 				waveformPlay.classList.add('control-button');
 				waveformPlay.classList.add('waveformPlay');
@@ -121,7 +141,6 @@
 				wavesurfer.on('click', () => {
 					wavesurfer.play()
 				});
-
 				
 				waveformStop.addEventListener('click', () => {
 					wavesurfer.stop();
@@ -131,12 +150,12 @@
 					wavesurfer.playPause();
 				});
 
-				// Add drag event listeners to the waveform
-				addDragAndDropEvents(waveformDiv);
-				
 				item.appendChild(waveformStop);
 				item.appendChild(waveformPlay);
 				item.appendChild(waveformDiv);
+
+				// Add drag event listeners to the item
+				addDragAndDropEvents(item);
 
 				waveformContainer.appendChild(item);
 
@@ -171,7 +190,7 @@
 
 		// Helper function to get the waveform item that is directly after the current drag position
 		function getDragAfterElement(container, y) {
-			const draggableElements = [...container.querySelectorAll('.waveformItem:not(.dragging)')];
+			const draggableElements = [...container.querySelectorAll('.item:not(.dragging)')];
 
 			return draggableElements.reduce((closest, child) => {
 				const box = child.getBoundingClientRect();
