@@ -204,15 +204,11 @@ app.post('/combine', async (req, res) => {
       })
       .on('end', () => {
         console.log('Files successfully combined');
-        res.send({
-          success: true,
-          message: 'Files combined successfully!',
-          combinedFilePath: `/uploads/${combinedFileName}`
-        });
+        
 
 				// padWithSilence(inputFile, outputFile, duration, maxDuration) {
 				if (paddedFilePaths.length < 6) {
-					
+					console.log("less than 6 files provided, adding silence to end");
 					const totalCombinedFileLength = maxDuration * 6;
 					const silenceDuration = totalCombinedFileLength - totalDuration;
 					const newInputFile = path.join(__dirname, `/uploads/${combinedFileName}`);
@@ -222,12 +218,25 @@ app.post('/combine', async (req, res) => {
 						.on('end', () => {
 							console.log(`Padded file generated: ${newCombinedFilePath}`);
 							
+							res.send({
+								success: true,
+								message: 'Files combined successfully!',
+								combinedFilePath: `${newCombinedFilePath}`
+							});
+
 						})
 						.on('error', (err) => {
 							console.error(`Error adding silence to combined file: ${err.message}`);
 							reject(err);
 						})
 						.save(newCombinedFilePath);
+				}
+				else {
+					res.send({
+						success: true,
+						message: 'Files combined successfully!',
+						combinedFilePath: `/uploads/${combinedFileName}`
+					});
 				}
 
 				// // If there were fewer than 6 files, add silence to the combined file to make 6 total segments

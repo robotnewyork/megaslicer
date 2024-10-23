@@ -166,3 +166,6 @@ input[type="file"] {
 #combineButton {
 	margin: 20px auto;
 }
+#combinedAudio {
+	margin: 0 auto 50px;
+}
