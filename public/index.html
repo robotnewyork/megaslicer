@@ -91,21 +91,21 @@
 				method: 'POST',
 				body: formData
 			})
-				.then(response => response.json())
-				.then(data => {
-					if (data.success) {
-						uploadedFilePaths = data.filePaths;
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					uploadedFilePaths = data.filePaths;
 
-						// Display waveforms with drag-and-drop functionality
-						displayWaveforms(data.filePaths);
+					// Display waveforms with drag-and-drop functionality
+					displayWaveforms(data.filePaths);
 
-						// Show the combine button
-						combineButton.style.display = 'block';
-					} else {
-						alert(data.message);
-					}
-				})
-				.catch(error => console.error('Error uploading files:', error));
+					// Show the combine button
+					combineButton.style.display = 'block';
+				} else {
+					alert(data.message);
+				}
+			})
+			.catch(error => console.error('Error uploading files:', error));
 		});
 
 		// Function to display the waveforms of uploaded files with drag-and-drop functionality
@@ -121,7 +121,7 @@
 				
 				const item = document.createElement('div');
 				item.classList.add('item');
-				item.setAttribute('draggable', true);
+				waveformDiv.setAttribute('draggable', true);
 				const waveformPlay = document.createElement('div');
 				waveformPlay.classList.add('control-button');
 				waveformPlay.classList.add('waveformPlay');
@@ -223,17 +223,17 @@
 				},
 				body: JSON.stringify({ filePaths: reorderedFilePaths })
 			})
-				.then(response => response.json())
-				.then(data => {
-					if (data.success) {
-						// Display the combined audio file
-						combinedAudio.src = data.combinedFilePath;
-						combinedAudio.style.display = 'block';
-					} else {
-						alert(data.message);
-					}
-				})
-				.catch(error => console.error('Error combining files:', error));
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					// Display the combined audio file
+					combinedAudio.src = data.combinedFilePath;
+					combinedAudio.style.display = 'block';
+				} else {
+					alert(data.message);
+				}
+			})
+			.catch(error => console.error('Error combining files:', error));
 		});
 	</script>
 </body>
